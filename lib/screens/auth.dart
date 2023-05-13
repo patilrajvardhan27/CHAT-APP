@@ -12,7 +12,18 @@ class AuthScreen extends StatefulWidget {
 class _AuthScreenState extends State<AuthScreen> {
   final _formKey = GlobalKey<FormState>();
   var _isLogin = true;
-  void _Submit() { }
+  var enteredEmail = '';
+  var enterPassw = '';
+
+  void _Submit() {
+    final isValid = _formKey.currentState!.validate();
+
+    if (isValid) {
+      _formKey.currentState!.save();
+      print(enteredEmail);
+      print(enterPassw);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,31 +48,42 @@ class _AuthScreenState extends State<AuthScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Form(
+                  key: _formKey,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       TextFormField(
-                          decoration:
-                              InputDecoration(labelText: 'Email Adderess'),
-                          keyboardType: TextInputType.emailAddress,
-                          autocorrect: false,
-                          textCapitalization: TextCapitalization.none,
-                          validator: (value) {
-                            if (value == null ||
-                                value.trim().isEmpty ||
-                                !value.contains('@')) {
-                              return 'Please enter a valid email address';
-                            }
-                          }),
+                        decoration:
+                            InputDecoration(labelText: 'Email Adderess'),
+                        keyboardType: TextInputType.emailAddress,
+                        autocorrect: false,
+                        textCapitalization: TextCapitalization.none,
+                        validator: (value) {
+                          if (value == null ||
+                              value.trim().isEmpty ||
+                              !value.contains('@')) {
+                            return 'Please enter a valid email address';
+                          }
+                          return null;
+                        },
+                        onSaved: (value){
+                          enteredEmail = value!;
+                        },
+                      ),
                       TextFormField(
-                          decoration: InputDecoration(labelText: 'Password'),
-                          obscureText: true,
-                          validator: (value) {
-                            if (value == null || value.trim().length < 6) {
-                              return 'Password must be atleast 6 characters long';
-                            }
-                            return null;
-                          }),
+                        decoration: InputDecoration(labelText: 'Password'),
+                        obscureText: true,
+                        validator: (value) {
+                          if (value == null || value.trim().length < 6) {
+                            return 'Password must be atleast 6 characters long';
+                          }
+                          return null;
+                        },
+                        onSaved: (value){
+                          enterPassw = value!;
+                        },
+
+                      ),
                       const SizedBox(
                         height: 12,
                       ),
