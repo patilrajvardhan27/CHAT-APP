@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+final _firebase = FirebaseAuth.instance;
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({Key? key}) : super(key: key);
@@ -15,13 +18,30 @@ class _AuthScreenState extends State<AuthScreen> {
   var enteredEmail = '';
   var enterPassw = '';
 
-  void _Submit() {
+  Future<void> _Submit() async {
     final isValid = _formKey.currentState!.validate();
-
-    if (isValid) {
-      _formKey.currentState!.save();
-      print(enteredEmail);
-      print(enterPassw);
+    if (!isValid) {
+      return;
+    }
+    _formKey.currentState!.save();
+    try {
+      if (_isLogin) {
+        final userCredentials = await _firebase.signInWithEmailAndPassword(
+            email: enteredEmail, password: enterPassw);
+      } else {
+        final userCredentials = await _firebase.createUserWithEmailAndPassword(
+            email: enteredEmail, password: enterPassw);
+      }
+    } on FirebaseAuthException catch (error) {
+      if (error.code == 'email-already-in-use') {
+        //...
+      }
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error.message ?? 'Authentication failed.'),
+        ),
+      );
     }
   }
 
@@ -66,7 +86,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           }
                           return null;
                         },
-                        onSaved: (value){
+                        onSaved: (value) {
                           enteredEmail = value!;
                         },
                       ),
@@ -79,10 +99,9 @@ class _AuthScreenState extends State<AuthScreen> {
                           }
                           return null;
                         },
-                        onSaved: (value){
+                        onSaved: (value) {
                           enterPassw = value!;
                         },
-
                       ),
                       const SizedBox(
                         height: 12,
